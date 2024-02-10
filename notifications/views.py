@@ -40,7 +40,7 @@ class NotificationsAPI(APIView):
         
         # receiving request data
         data = {
-            "content": contents,
+            "contents": contents,
             "upload": upload,
             "validity": request.data.get("validity"),
             "notification_link": request.data.get("notification_link"),
