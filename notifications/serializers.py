@@ -1,7 +1,10 @@
 from .models import Notifications
 from rest_framework import serializers
 
-class NotificationsSrializers(serializers.ModelSerializer):
+class NotificationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notifications
-        fields = ['date_subitted', 'contents', 'upload', 'validity', 'notification_link']
+        fields = ['contents', 'upload', 'validity', 'notification_link', 'style']
+
+class MessageSerializer(serializers.Serializer):
+    message = serializers.CharField(max_length=100)
