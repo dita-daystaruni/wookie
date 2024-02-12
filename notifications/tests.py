@@ -32,6 +32,8 @@ class NotificationsTest(TestCase):
             "file": SimpleUploadedFile("simple_file", b"this is a test file"),
             "validity": 1,
             "notification_link": "https://example.com/notification",
+            "file_type": "image",
+            "sender": "Tendwa"
         }
 
         _res = self.client.post("/notifications/", _form_data, format="multipart")
@@ -46,6 +48,8 @@ class NotificationsTest(TestCase):
             "file": SimpleUploadedFile("simple_file", b"this is a test file"),
             "validity": 1,
             "notification_link": "https://example.com/notification",
+            "file_type": "image",
+            "sender": "Tendwa"
         }
 
         # Test adding to the DB
