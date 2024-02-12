@@ -29,7 +29,10 @@ class Notifications(models.Model):
             for valid_notification in valid_notifications:
                 notification = {}
                 notification['contents'] = valid_notification.contents
-                notification['upload_url'] = 'http://127.0.0.1:8000' + valid_notification.upload.url
+                if valid_notification.upload:
+                    notification['upload_url'] = 'http://127.0.0.1:8000' + valid_notification.upload.url
+                else:
+                    notification['upload_url'] = ''
                 notification['notification_link'] = valid_notification.notification_link
                 notification['style'] = valid_notification.style
                 notification['file_type'] = valid_notification.file_type
