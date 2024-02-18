@@ -28,7 +28,7 @@ class NotificationsAPI(APIView):
         sender = request.data.get('sender')
         file_type = request.data.get('file_type')
 
-        if not contents or not upload:
+        if not contents and not upload:
             data = {"message": "Missing Post Content or Post Uploads"}
             serializer = MessageSerializer(data)
             return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
