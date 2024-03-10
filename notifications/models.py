@@ -18,8 +18,10 @@ class Notifications(models.Model):
     file_type = models.CharField(max_length=10, blank=False, null=False, default='')
 
     @staticmethod
-    def get_valid_notifcations():
+    def get_valid_notifcations(request):
         """
+        Args:
+            request: The Request body sent by the client
         returns valid notifications
         """
         data = [] # holds data to be returned
@@ -30,7 +32,7 @@ class Notifications(models.Model):
                 notification = {}
                 notification['contents'] = valid_notification.contents
                 if valid_notification.upload:
-                    notification['upload_url'] = 'http://127.0.0.1:8000' + valid_notification.upload.url
+                    notification['upload_url'] = "http://" + request.get_host()  + valid_notification.upload.url
                 else:
                     notification['upload_url'] = ''
                 notification['notification_link'] = valid_notification.notification_link
