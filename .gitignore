@@ -4,6 +4,9 @@ uploads/
 # xlx files
 *.xlxs
 
+# Database Migrations
+*migrations*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
