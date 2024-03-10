@@ -16,7 +16,8 @@ class NotificationsAPI(APIView):
         """
         Returns notifications that are to be displayed
         """
-        valid_notifications = Notifications.get_valid_notifcations()
+        valid_notifications = Notifications.get_valid_notifcations(request)
+        print(valid_notifications)
         return Response(data=valid_notifications, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
@@ -28,7 +29,7 @@ class NotificationsAPI(APIView):
         sender = request.data.get('sender')
         file_type = request.data.get('file_type')
 
-        if not contents or not upload:
+        if not contents and not upload:
             data = {"message": "Missing Post Content or Post Uploads"}
             serializer = MessageSerializer(data)
             return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)

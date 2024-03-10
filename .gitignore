@@ -1,6 +1,9 @@
 # upload folder
 uploads/
 
+# xlx files
+*.xlxs
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
