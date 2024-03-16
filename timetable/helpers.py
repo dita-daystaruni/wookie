@@ -2,6 +2,62 @@
 from openpyxl import load_workbook
 from datetime import datetime
 
+def nursing_exam_timetable_parser(file_path: str):
+
+    # Define the list of column headers
+    column_headers = ['Day', 'Campus', 'Coordinator', 'Courses', 'Hours', 'Venue', 'Invigilators', 'Courses_Afternoon', 'Hours_Afternoon', 'Invigilators_Afternoon', 'None', 'Venue_Afternoon']
+
+    def extract_course_info(column_data_dict, time_key, time_range):
+        courses = []
+        existing_course_info = set()
+        for i in range(len(column_data_dict["Day"])):
+            if column_data_dict[time_key][i] not in time_range:
+                course_info = {
+                    "Course_Name": column_data_dict[time_key][i],
+                    "Coordinator": column_data_dict["Coordinator"][i],
+                    "Time": time_range[0] if "8.30am" in time_range[0] else time_range[1],
+                    "Day": column_data_dict["Day"][i],
+                    "Campus": column_data_dict["Campus"][i],
+                    "Hrs": column_data_dict[f"Hours{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
+                    "Venue": column_data_dict[f"Venue{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
+                    "Invigilator": column_data_dict[f"Invigilators{'_Afternoon' if '_Afternoon' in time_key else ''}"][i]
+                }
+                if tuple(course_info.items()) not in existing_course_info:
+                    courses.append(course_info)
+                    existing_course_info.add(tuple(course_info.items()))
+        return courses
+
+    # Loading the excel workbook
+    wb_obj = load_workbook(filename=file_path)
+    sheet = wb_obj.active  # Activating the sheet for use
+
+    # Initialize dictionary to store column data
+    column_data_dict = {}
+
+    # Iterate over columns and store data in dictionary
+    for i, column in enumerate(sheet.iter_cols(values_only=True)):
+        last_value = None
+        column_data = []
+        for cell in column:
+            if cell is not None:
+                if column_headers[i] == 'Day':
+                    cell = cell.strftime('%d-%m-%Y')
+                last_value = cell
+                column_data.append(cell)
+            else:
+                column_data.append(last_value)
+        if any(cell is not None for cell in column_data):
+            column_data_dict[column_headers[i]] = column_data
+
+    # Extract course information
+    morning_exams = extract_course_info(column_data_dict, "Courses", ['8.30am -11.30 am', '1.30-4.30pm'])
+    afternoon_exams = extract_course_info(column_data_dict, "Courses_Afternoon", ['8.30am -11.30 am', '1.30-4.30pm'])
+
+    # Combine morning and afternoon exams
+    courses = morning_exams + afternoon_exams
+
+    return courses
+
 
 def parse_nursing_timetable(path_to_file):
     # holds start and end times of every column number
