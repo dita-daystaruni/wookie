@@ -5,7 +5,10 @@ from datetime import datetime
 def nursing_exam_timetable_parser(file_path: str):
 
     # Define the list of column headers
-    column_headers = ['Day', 'Campus', 'Coordinator', 'Courses', 'Hours', 'Venue', 'Invigilators', 'Courses_Afternoon', 'Hours_Afternoon', 'Invigilators_Afternoon', 'None', 'Venue_Afternoon']
+    column_headers = ['Day', 'Campus', 'Coordinator', 'Courses', 'Hours', 
+                      'Venue', 'Invigilators', 'Courses_Afternoon', 
+                      'Hours_Afternoon', 'Invigilators_Afternoon', 
+                      'None', 'Venue_Afternoon']
 
     def extract_course_info(column_data_dict, time_key, time_range):
         courses = []
@@ -156,4 +159,5 @@ def parse_nursing_timetable(path_to_file):
                 "venue":venue,
                 "time":course_time
                 })
+            
     return courses
