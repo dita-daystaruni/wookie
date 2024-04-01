@@ -2,7 +2,12 @@
 uploads/
 
 # xlx files
-*.xlxs
+*.xlsx
+*.xls
+*.odt
+
+# pub keys
+*.pub
 
 # Database Migrations
 *migrations*
