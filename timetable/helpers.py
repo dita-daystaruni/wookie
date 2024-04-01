@@ -2,6 +2,7 @@
 from openpyxl import load_workbook
 from datetime import datetime
 
+# parses nursing exam timetable
 def nursing_exam_timetable_parser(file_path: str):
 
     # Define the list of column headers
@@ -62,7 +63,8 @@ def nursing_exam_timetable_parser(file_path: str):
     return courses
 
 
-def parse_nursing_timetable(path_to_file):
+# parses nursing school timetable
+def parse_nursing_timetable(file_path):
     # holds start and end times of every column number
     time_dictionary = {
         "2": ("8AM", "9AM"),
@@ -85,7 +87,7 @@ def parse_nursing_timetable(path_to_file):
     courses = [] # will hold dictionaries of courses
 
     # loading the excel workbook
-    wb_obj = load_workbook(filename="Course_TimeTable.xlsx")
+    wb_obj = load_workbook(filename=file_path)
     work_sheets = wb_obj.sheetnames # getting available work sheets
 
     # getting info from from first workbook
@@ -160,4 +162,76 @@ def parse_nursing_timetable(path_to_file):
                 "time":course_time
                 })
             
+    return courses
+
+# parses school exam timetable
+def parse_school_exam_timetable(path_to_file):
+    # loading the workbook
+    wb_obj = load_workbook(path_to_file)
+
+    work_sheets = wb_obj.sheetnames # getting available work sheets
+
+    # getting info from from first workbook
+    first_work_sheet = wb_obj[work_sheets[0]]
+
+    # for sheet in book.worksheets: #For each worksheet
+
+
+    rooms = {} # will hold room informationhold information about courses
+
+    courses = [] # will hold courses information
+
+    days_of_the_week = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+
+    # iterating through the rooms and storing them
+    for column_one in first_work_sheet.iter_cols(values_only=True): #For each Column in a workshee
+        for i, room in enumerate(column_one):
+            # skipping none values and room word
+            if room is None or room == "ROOM":
+                continue
+            rooms[f'{i}'] = room
+        break
+    # a list of the remaining columns without the rooms
+    data_columns = list(first_work_sheet.iter_cols(values_only=True))[1:]
+
+    # values for the course code
+    day = ""
+    time = ""
+    course_code = ""
+
+    # iterating through the columns data
+    for column in data_columns:
+        # SKIPPING TUESDAY CHAPEL TIME
+        if column[1] is not None and column[1].split(" ")[0] == "TUESDAY":
+            if column[2].strip() == "8:30AM-9:30AM":
+                continue
+        
+        # SKIPPING THURSDAY CHAPEL TIME
+        if column[1] is not None and column[1].split(" ")[0] == "THURSDAY":
+            if column[2].strip() == "8:30AM-9:30AM":
+                continue
+        
+        for idx, value in enumerate(column):
+            # skipping empty cell values
+            if value is None:
+                continue
+
+            # checking if its date and day specification
+            if value.split(" ")[0] in days_of_the_week:
+                day = value
+
+            # checking if its time specification
+            elif value[0].isdigit():
+                time = value
+            else:
+                course_code = value
+            
+                courses.append(
+                    {
+                        "course_code": course_code,
+                        "day": day,
+                        "time": time,
+                        "room": rooms[f'{idx}']
+                    }
+                )
     return courses
