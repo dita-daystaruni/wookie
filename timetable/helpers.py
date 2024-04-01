@@ -17,14 +17,14 @@ def nursing_exam_timetable_parser(file):
         for i in range(len(column_data_dict["Day"])):
             if column_data_dict[time_key][i] not in time_range:
                 course_info = {
-                    "Course_Name": column_data_dict[time_key][i],
-                    "Coordinator": column_data_dict["Coordinator"][i],
-                    "Time": time_range[0] if "8.30am" in time_range[0] else time_range[1],
-                    "Day": column_data_dict["Day"][i],
-                    "Campus": column_data_dict["Campus"][i],
-                    "Hrs": column_data_dict[f"Hours{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
-                    "Venue": column_data_dict[f"Venue{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
-                    "Invigilator": column_data_dict[f"Invigilators{'_Afternoon' if '_Afternoon' in time_key else ''}"][i]
+                    "course_code": column_data_dict[time_key][i],
+                    "coordinator": column_data_dict["Coordinator"][i],
+                    "time": time_range[0] if "8.30am" in time_range[0] else time_range[1],
+                    "day": column_data_dict["Day"][i],
+                    "campus": column_data_dict["Campus"][i],
+                    "hrs": column_data_dict[f"Hours{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
+                    "venue": column_data_dict[f"Venue{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
+                    "invigilator": column_data_dict[f"Invigilators{'_Afternoon' if '_Afternoon' in time_key else ''}"][i]
                 }
                 if tuple(course_info.items()) not in existing_course_info:
                     courses.append(course_info)
@@ -45,7 +45,7 @@ def nursing_exam_timetable_parser(file):
         for cell in column:
             if cell is not None:
                 if column_headers[i] == 'Day':
-                    cell = cell.strftime('%d-%m-%Y')
+                    cell = cell.strftime('%A %d-%m-%Y')
                 last_value = cell
                 column_data.append(cell)
             else:
