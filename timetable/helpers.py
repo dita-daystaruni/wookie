@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 from datetime import datetime
 
 # parses nursing exam timetable
-def nursing_exam_timetable_parser(file_path: str):
+def nursing_exam_timetable_parser(file):
 
     # Define the list of column headers
     column_headers = ['Day', 'Campus', 'Coordinator', 'Courses', 'Hours', 
@@ -32,7 +32,7 @@ def nursing_exam_timetable_parser(file_path: str):
         return courses
 
     # Loading the excel workbook
-    wb_obj = load_workbook(filename=file_path)
+    wb_obj = load_workbook(file)
     sheet = wb_obj.active  # Activating the sheet for use
 
     # Initialize dictionary to store column data
@@ -90,7 +90,7 @@ def parse_nursing_timetable(file_path):
     wb_obj = load_workbook(filename=file_path)
     work_sheets = wb_obj.sheetnames # getting available work sheets
 
-    # getting info from from first workbook
+    # getting info from from first worksheet
     first_work_sheet = wb_obj[work_sheets[0]]
 
     # will hold course names and lecturers key being course code
@@ -104,6 +104,7 @@ def parse_nursing_timetable(file_path):
         # concantenating course name and the lecturer
         course_lectures[row[1]] = [row[2] , row[3]] 
 
+     # getting info from from second worksheet
     second_work_sheet = wb_obj[work_sheets[1]]
 
     # course contents
@@ -165,9 +166,21 @@ def parse_nursing_timetable(file_path):
     return courses
 
 # parses school exam timetable
-def parse_school_exam_timetable(path_to_file):
+def parse_school_exam_timetable(file):
+    def time_difference(start_time, end_time): 
+        """
+        Returns the difference in hrs between two
+        time intervals
+        """
+
+        format = '%I:%M%p'
+        start_time = datetime.strptime(start_time, format)
+        end_time = datetime.strptime(end_time, format)
+        hrs = (end_time - start_time).total_seconds() / 3600
+        return str(hrs)
+
     # loading the workbook
-    wb_obj = load_workbook(path_to_file)
+    wb_obj = load_workbook(file)
 
     work_sheets = wb_obj.sheetnames # getting available work sheets
 
@@ -222,7 +235,10 @@ def parse_school_exam_timetable(path_to_file):
 
             # checking if its time specification
             elif value[0].isdigit():
-                time = value
+                course_time = value.strip()
+                start_time = course_time.split("-")[0]
+                end_time = course_time.split("-")[1]
+                hours = time_difference(start_time, end_time)
             else:
                 course_code = value
             
@@ -230,8 +246,10 @@ def parse_school_exam_timetable(path_to_file):
                     {
                         "course_code": course_code,
                         "day": day,
-                        "time": time,
-                        "room": rooms[f'{idx}']
+                        "time": course_time,
+                        "venue": rooms[f'{idx}'],
+                        # handles errors recorded in exam timetable defaults to 2
+                        "hrs": "2" if hours[0] == "-" else hours[0],
                     }
                 )
     return courses
