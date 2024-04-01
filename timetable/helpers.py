@@ -2,8 +2,69 @@
 from openpyxl import load_workbook
 from datetime import datetime
 
+# parses nursing exam timetable
+def nursing_exam_timetable_parser(file):
 
-def parse_nursing_timetable(path_to_file):
+    # Define the list of column headers
+    column_headers = ['Day', 'Campus', 'Coordinator', 'Courses', 'Hours', 
+                      'Venue', 'Invigilators', 'Courses_Afternoon', 
+                      'Hours_Afternoon', 'Invigilators_Afternoon', 
+                      'None', 'Venue_Afternoon']
+
+    def extract_course_info(column_data_dict, time_key, time_range):
+        courses = []
+        existing_course_info = set()
+        for i in range(len(column_data_dict["Day"])):
+            if column_data_dict[time_key][i] not in time_range:
+                course_info = {
+                    "course_code": column_data_dict[time_key][i],
+                    "coordinator": column_data_dict["Coordinator"][i],
+                    "time": time_range[0] if "8.30am" in time_range[0] else time_range[1],
+                    "day": column_data_dict["Day"][i],
+                    "campus": column_data_dict["Campus"][i],
+                    "hrs": column_data_dict[f"Hours{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
+                    "venue": column_data_dict[f"Venue{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
+                    "invigilator": column_data_dict[f"Invigilators{'_Afternoon' if '_Afternoon' in time_key else ''}"][i]
+                }
+                if tuple(course_info.items()) not in existing_course_info:
+                    courses.append(course_info)
+                    existing_course_info.add(tuple(course_info.items()))
+        return courses
+
+    # Loading the excel workbook
+    wb_obj = load_workbook(file)
+    sheet = wb_obj.active  # Activating the sheet for use
+
+    # Initialize dictionary to store column data
+    column_data_dict = {}
+
+    # Iterate over columns and store data in dictionary
+    for i, column in enumerate(sheet.iter_cols(values_only=True)):
+        last_value = None
+        column_data = []
+        for cell in column:
+            if cell is not None:
+                if column_headers[i] == 'Day':
+                    cell = cell.strftime('%A %d-%m-%Y')
+                last_value = cell
+                column_data.append(cell)
+            else:
+                column_data.append(last_value)
+        if any(cell is not None for cell in column_data):
+            column_data_dict[column_headers[i]] = column_data
+
+    # Extract course information
+    morning_exams = extract_course_info(column_data_dict, "Courses", ['8.30am -11.30 am', '1.30-4.30pm'])
+    afternoon_exams = extract_course_info(column_data_dict, "Courses_Afternoon", ['8.30am -11.30 am', '1.30-4.30pm'])
+
+    # Combine morning and afternoon exams
+    courses = morning_exams + afternoon_exams
+
+    return courses
+
+
+# parses nursing school timetable
+def parse_nursing_timetable(file_path):
     # holds start and end times of every column number
     time_dictionary = {
         "2": ("8AM", "9AM"),
@@ -26,10 +87,10 @@ def parse_nursing_timetable(path_to_file):
     courses = [] # will hold dictionaries of courses
 
     # loading the excel workbook
-    wb_obj = load_workbook(filename="Course_TimeTable.xlsx")
+    wb_obj = load_workbook(filename=file_path)
     work_sheets = wb_obj.sheetnames # getting available work sheets
 
-    # getting info from from first workbook
+    # getting info from from first worksheet
     first_work_sheet = wb_obj[work_sheets[0]]
 
     # will hold course names and lecturers key being course code
@@ -43,6 +104,7 @@ def parse_nursing_timetable(path_to_file):
         # concantenating course name and the lecturer
         course_lectures[row[1]] = [row[2] , row[3]] 
 
+     # getting info from from second worksheet
     second_work_sheet = wb_obj[work_sheets[1]]
 
     # course contents
@@ -100,4 +162,94 @@ def parse_nursing_timetable(path_to_file):
                 "venue":venue,
                 "time":course_time
                 })
+            
+    return courses
+
+# parses school exam timetable
+def parse_school_exam_timetable(file):
+    def time_difference(start_time, end_time): 
+        """
+        Returns the difference in hrs between two
+        time intervals
+        """
+
+        format = '%I:%M%p'
+        start_time = datetime.strptime(start_time, format)
+        end_time = datetime.strptime(end_time, format)
+        hrs = (end_time - start_time).total_seconds() / 3600
+        return str(hrs)
+
+    # loading the workbook
+    wb_obj = load_workbook(file)
+
+    work_sheets = wb_obj.sheetnames # getting available work sheets
+
+    # getting info from from first workbook
+    first_work_sheet = wb_obj[work_sheets[0]]
+
+    # for sheet in book.worksheets: #For each worksheet
+
+
+    rooms = {} # will hold room informationhold information about courses
+
+    courses = [] # will hold courses information
+
+    days_of_the_week = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+
+    # iterating through the rooms and storing them
+    for column_one in first_work_sheet.iter_cols(values_only=True): #For each Column in a workshee
+        for i, room in enumerate(column_one):
+            # skipping none values and room word
+            if room is None or room == "ROOM":
+                continue
+            rooms[f'{i}'] = room
+        break
+    # a list of the remaining columns without the rooms
+    data_columns = list(first_work_sheet.iter_cols(values_only=True))[1:]
+
+    # values for the course code
+    day = ""
+    time = ""
+    course_code = ""
+
+    # iterating through the columns data
+    for column in data_columns:
+        # SKIPPING TUESDAY CHAPEL TIME
+        if column[1] is not None and column[1].split(" ")[0] == "TUESDAY":
+            if column[2].strip() == "8:30AM-9:30AM":
+                continue
+        
+        # SKIPPING THURSDAY CHAPEL TIME
+        if column[1] is not None and column[1].split(" ")[0] == "THURSDAY":
+            if column[2].strip() == "8:30AM-9:30AM":
+                continue
+        
+        for idx, value in enumerate(column):
+            # skipping empty cell values
+            if value is None:
+                continue
+
+            # checking if its date and day specification
+            if value.split(" ")[0] in days_of_the_week:
+                day = value
+
+            # checking if its time specification
+            elif value[0].isdigit():
+                course_time = value.strip()
+                start_time = course_time.split("-")[0]
+                end_time = course_time.split("-")[1]
+                hours = time_difference(start_time, end_time)
+            else:
+                course_code = value
+            
+                courses.append(
+                    {
+                        "course_code": course_code,
+                        "day": day,
+                        "time": course_time,
+                        "venue": rooms[f'{idx}'],
+                        # handles errors recorded in exam timetable defaults to 2
+                        "hrs": "2" if hours[0] == "-" else hours[0],
+                    }
+                )
     return courses
