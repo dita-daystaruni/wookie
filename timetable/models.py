@@ -5,9 +5,9 @@ class CoursesExamInfo(models.Model):
     """
     Will hold info about course exam timetable info
     """
-    course_code = models.CharField(max_length=15, default="",blank=False, unique=True)
+    course_code = models.CharField(max_length=50, default="",blank=False, unique=True)
     day = models.CharField(max_length=50, default="",blank=False)
-    time = models.CharField(max_length=15, default="",blank=True)
+    time = models.CharField(max_length=50, default="",blank=True)
     venue = models.CharField(max_length=50, default="",blank=False)
     campus = models.CharField(max_length=50, default="",blank=False)
     coordinator = models.CharField(max_length=50, default="",blank=False)
