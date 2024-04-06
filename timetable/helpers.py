@@ -54,8 +54,8 @@ def nursing_exam_timetable_parser(file):
             column_data_dict[column_headers[i]] = column_data
 
     # Extract course information
-    morning_exams = extract_course_info(column_data_dict, "Courses", ['8.30am -11.30 am', '1.30-4.30pm'])
-    afternoon_exams = extract_course_info(column_data_dict, "Courses_Afternoon", ['8.30am -11.30 am', '1.30-4.30pm'])
+    morning_exams = extract_course_info(column_data_dict, "Courses", ['8:30AM-11:30AM', '1:30PM-4:30PM'])
+    afternoon_exams = extract_course_info(column_data_dict, "Courses_Afternoon", ['8:30AM-11:30AM', '1:30PM-4:30PM'])
 
     # Combine morning and afternoon exams
     courses = morning_exams + afternoon_exams

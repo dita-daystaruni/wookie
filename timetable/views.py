@@ -6,7 +6,7 @@ from notifications.serializers import MessageSerializer
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
+from .models import CoursesExamInfo
 
 class ParseTimeTablesAPI(APIView):
     """
@@ -40,4 +40,24 @@ class ParseTimeTablesAPI(APIView):
         message = {"message": "Successfully Parsed and Saved To Database"}
         serializer = MessageSerializer(message)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
+
+class ExamsCourseInfoAPI(APIView):
+    """"
+    Will be Used to return exams info 
+    about a course
+    """
+    def post(self, request, *args, **kwargs):
+        """
+        Receives a list of course codes and
+        Returns a list of exam course info
+        """
+        course_codes = request.data.get("course_codes")
+        exams_info = [] # will hold the Data to return 
+
+        for course_code in course_codes:
+            for exam_info in CoursesExamInfo.objects.filter(
+                course_code__icontains = course_code).all():
+                exams_info.append(exam_info)
+
+        serializer = CourseExamInfoSerializer(exams_info, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
