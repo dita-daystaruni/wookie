@@ -218,11 +218,15 @@ def parse_school_exam_timetable(file):
         # SKIPPING TUESDAY CHAPEL TIME
         if column[1] is not None and column[1].split(" ")[0] == "TUESDAY":
             if column[2].strip() == "8:30AM-9:30AM":
+                # set the day before skipping the columns
+                day = column[1]
                 continue
         
         # SKIPPING THURSDAY CHAPEL TIME
         if column[1] is not None and column[1].split(" ")[0] == "THURSDAY":
             if column[2].strip() == "8:30AM-9:30AM":
+                # set the day before skipping the columns
+                day = column[1]
                 continue
         
         for idx, value in enumerate(column):
