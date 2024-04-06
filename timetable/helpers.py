@@ -9,26 +9,27 @@ def nursing_exam_timetable_parser(file):
     column_headers = ['Day', 'Campus', 'Coordinator', 'Courses', 'Hours', 
                       'Venue', 'Invigilators', 'Courses_Afternoon', 
                       'Hours_Afternoon', 'Invigilators_Afternoon', 
-                      'None', 'Venue_Afternoon']
+                      'Venue_Afternoon']
 
     def extract_course_info(column_data_dict, time_key, time_range):
         courses = []
-        existing_course_info = set()
+        existing_course_codes = set()
         for i in range(len(column_data_dict["Day"])):
-            if column_data_dict[time_key][i] not in time_range:
+            course_code = column_data_dict[time_key][i]
+            if course_code not in time_range and course_code not in existing_course_codes:
                 course_info = {
                     "course_code": column_data_dict[time_key][i],
                     "coordinator": column_data_dict["Coordinator"][i],
-                    "time": time_range[0] if "8.30am" in time_range[0] else time_range[1],
+                    "time": '8:30AM-11:30AM' if "8.30" in time_range[0] else '1:30PM-4:30PM',
                     "day": column_data_dict["Day"][i],
                     "campus": column_data_dict["Campus"][i],
                     "hrs": column_data_dict[f"Hours{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
                     "venue": column_data_dict[f"Venue{'_Afternoon' if '_Afternoon' in time_key else ''}"][i],
                     "invigilator": column_data_dict[f"Invigilators{'_Afternoon' if '_Afternoon' in time_key else ''}"][i]
                 }
-                if tuple(course_info.items()) not in existing_course_info:
-                    courses.append(course_info)
-                    existing_course_info.add(tuple(course_info.items()))
+                
+                courses.append(course_info)
+                existing_course_codes.add(course_code)
         return courses
 
     # Loading the excel workbook
@@ -44,8 +45,8 @@ def nursing_exam_timetable_parser(file):
         column_data = []
         for cell in column:
             if cell is not None:
-                if column_headers[i] == 'Day':
-                    cell = cell.strftime('%A %d-%m-%Y')
+                # if column_headers[i] == 'Day':
+                #     cell = cell.strftime('%A %d-%m-%Y')
                 last_value = cell
                 column_data.append(cell)
             else:
@@ -54,8 +55,8 @@ def nursing_exam_timetable_parser(file):
             column_data_dict[column_headers[i]] = column_data
 
     # Extract course information
-    morning_exams = extract_course_info(column_data_dict, "Courses", ['8:30AM-11:30AM', '1:30PM-4:30PM'])
-    afternoon_exams = extract_course_info(column_data_dict, "Courses_Afternoon", ['8:30AM-11:30AM', '1:30PM-4:30PM'])
+    morning_exams = extract_course_info(column_data_dict, "Courses", ['8.30AM-11.30AM', '8.30-11.30 AM'])
+    afternoon_exams = extract_course_info(column_data_dict, "Courses_Afternoon", ['1.30PM-4.30PM', '1.30-4.30PM'])
 
     # Combine morning and afternoon exams
     courses = morning_exams + afternoon_exams
