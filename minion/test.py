@@ -1,7 +1,7 @@
-import minion
+# from .minion import Minion
 
-m = minion.Minion(
-    "/home/erick/Projects/apps/academia-backend/uploads/exam_sheets/hello.xlsx"
-)
+# m = Minion(
+#     "/home/erick/Projects/apps/academia-backend/uploads/exam_sheets/hello.xlsx"
+# )
 
-m.digest()
+# m.digest()

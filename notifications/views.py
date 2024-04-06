@@ -12,7 +12,7 @@ class NotificationsAPI(APIView):
 
     def get(self, request, *arg, **kwargs):
         """Return notifications that are to be displayed."""
-        valid_notifications = Notifications.get_valid_notifcations()
+        valid_notifications = Notifications.get_valid_notifcations(request)
         return Response(data=valid_notifications, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
