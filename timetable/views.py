@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import render
 from .serializers import CourseExamInfoSerializer
+from .models import CoursesExamInfo
 from .helpers import parse_school_exam_timetable, nursing_exam_timetable_parser
 from notifications.serializers import MessageSerializer
 from rest_framework import status
@@ -26,11 +27,43 @@ class ParseTimeTablesAPI(APIView):
                 if serializer.is_valid():
                     serializer.save()
                 else:
+                    print(course)
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif file_to_parse == "nursing_exams":
             courses = nursing_exam_timetable_parser(file)
             for course in courses:
                 serializer = CourseExamInfoSerializer(data=course)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+         # parsing and writing to database was successful
+        message = {"message": "Successfully Parsed and Saved To Database"}
+        serializer = MessageSerializer(message)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, *args, **kwargs):
+        """
+        Updates the Course Info
+        """
+        file = request.data.get("file")
+        file_to_parse = request.data.get("file_name")
+
+        if file_to_parse == "school_exams":
+            courses = parse_school_exam_timetable(file)
+            for course in courses:
+                exam_course = CoursesExamInfo.objects.get(course_code=course["course_code"])
+                serializer = CourseExamInfoSerializer(exam_course, data=course)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif file_to_parse == "nursing_exams":
+            courses = nursing_exam_timetable_parser(file)
+            for course in courses:
+                exam_course = CoursesExamInfo.objects.get(course_code=course["course_code"])
+                serializer = CourseExamInfoSerializer(exam_course, data=course)
                 if serializer.is_valid():
                     serializer.save()
                 else:
