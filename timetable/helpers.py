@@ -18,7 +18,7 @@ def nursing_exam_timetable_parser(file):
             course_code = column_data_dict[time_key][i]
             if course_code not in time_range and course_code not in existing_course_codes:
                 course_info = {
-                    "course_code": column_data_dict[time_key][i],
+                    "course_code": column_data_dict[time_key][i].strip().replace(" ", ""),
                     "coordinator": column_data_dict["Coordinator"][i],
                     "time": '8:30AM-11:30AM' if "8.30" in time_range[0] else '1:30PM-4:30PM',
                     "day": column_data_dict["Day"][i],
