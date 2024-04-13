@@ -186,75 +186,72 @@ def parse_school_exam_timetable(file):
     work_sheets = wb_obj.sheetnames # getting available work sheets
 
     # getting info from from first workbook
-    first_work_sheet = wb_obj[work_sheets[0]]
-
-    # for sheet in book.worksheets: #For each worksheet
-
-
-    rooms = {} # will hold room informationhold information about courses
+    sheets = [wb_obj[work_sheets[1]], wb_obj[work_sheets[2]]]
 
     courses = [] # will hold courses information
 
-    days_of_the_week = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
+    days_of_the_week = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]
 
     # iterating through the rooms and storing them
-    for column_one in first_work_sheet.iter_cols(values_only=True): #For each Column in a workshee
-        for i, room in enumerate(column_one):
-            # skipping none values and room word
-            if room is None or room == "ROOM":
-                continue
-            rooms[f'{i}'] = room
-        break
-    # a list of the remaining columns without the rooms
-    data_columns = list(first_work_sheet.iter_cols(values_only=True))[1:]
+    for sheet in sheets:
+        rooms = {} # will hold room informationhold information about courses
 
-    # values for the course code
-    day = ""
-    time = ""
-    course_code = ""
+        for column_one in sheet.iter_cols(values_only=True): #For each Column in a worksheet
+            for i, room in enumerate(column_one, start=1):
+                # skipping none values and room word
+                if room is None or room == "ROOM":
+                    continue
+                rooms[f'{i}'] = room
+            break
+        # a list of the remaining columns without the rooms
+        data_columns = list(sheet.iter_cols(values_only=True))[1:]
 
-    # iterating through the columns data
-    for column in data_columns:
-        # SKIPPING TUESDAY CHAPEL TIME
-        if column[1] is not None and column[1].split(" ")[0] == "TUESDAY":
-            if column[2].strip() == "8:30AM-9:30AM":
-                # set the day before skipping the columns
-                day = column[1]
-                continue
-        
-        # SKIPPING THURSDAY CHAPEL TIME
-        if column[1] is not None and column[1].split(" ")[0] == "THURSDAY":
-            if column[2].strip() == "8:30AM-9:30AM":
-                # set the day before skipping the columns
-                day = column[1]
-                continue
-        
-        for idx, value in enumerate(column):
-            # skipping empty cell values
-            if value is None:
-                continue
+        # values for the course code
+        day = ""
+        time = ""
+        course_code = ""
 
-            # checking if its date and day specification
-            if value.split(" ")[0] in days_of_the_week:
-                day = value
-
-            # checking if its time specification
-            elif value[0].isdigit():
-                course_time = value.strip()
-                start_time = course_time.split("-")[0]
-                end_time = course_time.split("-")[1]
-                hours = time_difference(start_time, end_time)
-            else:
-                course_code = value
+        # iterating through the columns data
+        for column in data_columns:
+            # SKIPPING TUESDAY CHAPEL TIME
+            if column[1] is not None and column[1].split(" ")[0] == "TUESDAY":
+                if column[2].strip() == "8:30AM-9:30AM":
+                    # set the day before skipping the columns
+                    day = column[1]
+                    continue
             
-                courses.append(
-                    {
-                        "course_code": course_code,
-                        "day": day,
-                        "time": course_time,
-                        "venue": rooms[f'{idx}'],
-                        # handles errors recorded in exam timetable defaults to 2
-                        "hrs": "2" if hours[0] == "-" else hours[0],
-                    }
-                )
+            # SKIPPING THURSDAY CHAPEL TIME
+            if column[1] is not None and column[1].split(" ")[0] == "THURSDAY":
+                if column[2].strip() == "8:30AM-9:30AM":
+                    # set the day before skipping the columns
+                    day = column[1]
+                    continue
+            
+            for idx, value in enumerate(column, start=1):
+                # skipping empty cell values
+                if value is None:
+                    continue
+
+                # checking if its date and day specification
+                if value.split(" ")[0] in days_of_the_week:
+                    day = value
+
+                # checking if its time specification
+                elif value[0].isdigit():
+                    course_time = value.strip()
+                    start_time = course_time.split("-")[0]
+                    end_time = course_time.split("-")[1]
+                    hours = time_difference(start_time, end_time)
+                else:
+                    course_code = value
+                    courses.append(
+                        {
+                            "course_code": course_code,
+                            "day": day,
+                            "time": course_time,
+                            "venue": rooms[f'{idx}'],
+                            # handles errors recorded in exam timetable defaults to 2
+                            "hrs": "2" if hours[0] == "-" else hours[0],
+                        }
+                    )
     return courses
