@@ -156,7 +156,7 @@ def parse_nursing_timetable(file_path):
             course_time = start_time + "-" + time_dictionary[f"{rem_idx}"][1]
             
             courses.append({
-                "course_code": course_name[:7],
+                "course_code": course_name[:7].strip().replace(" ", ""),
                 "lecturer": course_lectures[course_name[:7].strip()][1],
                 "course_name": course_name,
                 "day":day,
@@ -243,7 +243,7 @@ def parse_school_exam_timetable(file):
                     end_time = course_time.split("-")[1]
                     hours = time_difference(start_time, end_time)
                 else:
-                    course_code = value
+                    course_code = value.strip().replace(" ", "")
                     courses.append(
                         {
                             "course_code": course_code,
