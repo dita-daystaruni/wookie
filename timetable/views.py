@@ -91,6 +91,10 @@ class ExamsCourseInfoAPI(APIView):
         exams_info = [] # will hold the Data to return 
         for course_code in course_codes:
             # adding optional spaces to the search query to match spaces between searches
+            if "NUR" in course_code or "NUP" in course_code:
+                print("here")
+                course_code = course_code[:-1]
+            print(course_code)
             mod_course_code = "".join(f"{char}\s*" for char in course_code)
             for exam_info in CoursesExamInfo.objects.filter(
                 course_code__iregex = f".*{mod_course_code}.*").all():
