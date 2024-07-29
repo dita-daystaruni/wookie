@@ -223,7 +223,7 @@ def parse_school_exam_timetable(file):
                 # checking if its date and day specification
                 if isinstance(value, datetime) or value.split(" ")[0] in days_of_the_week:
                     day =  days_of_the_week[value.weekday()] + " " + \
-                        str(value.date()) if isinstance(value, datetime)\
+                        str(value.date()).replace("-", "/") if isinstance(value, datetime)\
                          else value
 
                 # checking if its time specification
