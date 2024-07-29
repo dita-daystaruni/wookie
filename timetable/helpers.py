@@ -166,7 +166,6 @@ def parse_nursing_timetable(file_path):
             
     return courses
 
-# parses school exam timetable
 def parse_school_exam_timetable(file):
     def time_difference(start_time, end_time): 
         """
@@ -181,30 +180,33 @@ def parse_school_exam_timetable(file):
         return str(hrs)
 
     # loading the workbook
-    wb_obj = load_workbook(file)
+    wb_obj = load_workbook(filename=file)
 
     work_sheets = wb_obj.sheetnames # getting available work sheets
 
     # getting info from from first workbook
-    sheets = [wb_obj[work_sheets[1]], wb_obj[work_sheets[2]]]
+    # first_work_sheet = wb_obj[work_sheets[0]]
+    # for sheet in book.worksheets: #For each worksheet
+
+
+    rooms = {} # will hold room informationhold information about courses
 
     courses = [] # will hold courses information
 
     days_of_the_week = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]
+    for sheet in work_sheets:
+        work_sheet = wb_obj[sheet]
 
-    # iterating through the rooms and storing them
-    for sheet in sheets:
-        rooms = {} # will hold room informationhold information about courses
-
-        for column_one in sheet.iter_cols(values_only=True): #For each Column in a worksheet
-            for i, room in enumerate(column_one, start=1):
+        # iterating through the rooms and storing them
+        for column_one in work_sheet.iter_cols(values_only=True): #For each Column in a worksheet
+            for i, room in enumerate(column_one):
                 # skipping none values and room word
                 if room is None or room == "ROOM":
                     continue
                 rooms[f'{i}'] = room
             break
         # a list of the remaining columns without the rooms
-        data_columns = list(sheet.iter_cols(values_only=True))[1:]
+        data_columns = list(work_sheet.iter_cols(values_only=True))[1:]
 
         # values for the course code
         day = ""
@@ -213,28 +215,16 @@ def parse_school_exam_timetable(file):
 
         # iterating through the columns data
         for column in data_columns:
-            # SKIPPING TUESDAY CHAPEL TIME
-            if column[1] is not None and column[1].split(" ")[0] == "TUESDAY":
-                if column[2].strip() == "8:30AM-9:30AM":
-                    # set the day before skipping the columns
-                    day = column[1]
-                    continue
-            
-            # SKIPPING THURSDAY CHAPEL TIME
-            if column[1] is not None and column[1].split(" ")[0] == "THURSDAY":
-                if column[2].strip() == "8:30AM-9:30AM":
-                    # set the day before skipping the columns
-                    day = column[1]
-                    continue
-            
-            for idx, value in enumerate(column, start=1):
+            for idx, value in enumerate(column):
                 # skipping empty cell values
                 if value is None:
                     continue
 
                 # checking if its date and day specification
-                if value.split(" ")[0] in days_of_the_week:
-                    day = value
+                if isinstance(value, datetime) or value.split(" ")[0] in days_of_the_week:
+                    day =  days_of_the_week[value.weekday()] + " " + \
+                        str(value.date()) if isinstance(value, datetime)\
+                         else value
 
                 # checking if its time specification
                 elif value[0].isdigit():
@@ -243,7 +233,8 @@ def parse_school_exam_timetable(file):
                     end_time = course_time.split("-")[1]
                     hours = time_difference(start_time, end_time)
                 else:
-                    course_code = value.strip().replace(" ", "")
+                    course_code = value
+                
                     courses.append(
                         {
                             "course_code": course_code,

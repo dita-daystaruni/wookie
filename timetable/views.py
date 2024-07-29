@@ -61,10 +61,7 @@ class ParseTimeTablesAPI(APIView):
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif file_to_parse == "nursing_exams":
             courses = nursing_exam_timetable_parser(file)
-            i = 0
             for course in courses:
-                print(course["course_code"], "this ",i)
-                i+=1
                 exam_course = CoursesExamInfo.objects.get(course_code=course["course_code"])
                 serializer = CourseExamInfoSerializer(exam_course, data=course)
                 if serializer.is_valid():
@@ -92,9 +89,7 @@ class ExamsCourseInfoAPI(APIView):
         for course_code in course_codes:
             # adding optional spaces to the search query to match spaces between searches
             if "NUR" in course_code or "NUP" in course_code:
-                print("here")
                 course_code = course_code[:-1]
-            print(course_code)
             mod_course_code = "".join(f"{char}\s*" for char in course_code)
             for exam_info in CoursesExamInfo.objects.filter(
                 course_code__iregex = f".*{mod_course_code}.*").all():
