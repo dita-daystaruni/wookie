@@ -234,7 +234,6 @@ def parse_school_exam_timetable(file):
                     hours = time_difference(start_time, end_time)
                 else:
                     course_code = value
-                
                     courses.append(
                         {
                             "course_code": course_code,
