@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     # Custom applications
+    "course.apps.CourseConfig",
     "notifications.apps.NotificationsConfig",
     "timetable.apps.TimetableConfig",
     "exams.apps.ExamsConfig",
