@@ -1,9 +1,10 @@
+from django.db import IntegrityError
 from rest_framework import serializers
 
 from course.models import Course, Lesson
 
 
-class CourseSerializer(serializers.Serializer):
+class CourseSerializer(serializers.ModelSerializer):
     """
     The course serializer
     """
@@ -12,8 +13,17 @@ class CourseSerializer(serializers.Serializer):
         model = Course
         fields = "__all__"
 
+    def create(self, validated_data):
+        print("Create called")
+        try:
+            course = Course.objects.create(**validated_data)
+        except Exception:
+            course = Course.objects.filter(unit=validated_data.unit)
 
-class LessonSerializer(serializers.Serializer):
+        return course
+
+
+class LessonSerializer(serializers.ModelSerializer):
     """The lesson serializer"""
 
     class Meta:
