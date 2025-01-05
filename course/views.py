@@ -11,12 +11,20 @@ from wookie.pagination_result_sets import ResultsSetPagination
 
 
 class CoursesListView(ListAPIView):
+    """
+    Lists all courses in a paginated format as per the ResultsSetPagination
+    """
+
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
     pagination_class = ResultsSetPagination
 
 
 class CoursesCreateView(CreateAPIView):
+    """
+    A view to create a course
+    """
+
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
 
@@ -34,7 +42,7 @@ class CourseDeleteView(DestroyAPIView):
         return Response(
             {
                 "error": "Strong with the force you are not, more training you need",
-                "details": "You lack permissions to delete this artifact",
+                "details": "You lack the necessarry permissions to delete this artifact",
             },
             status=HTTP_401_UNAUTHORIZED,
         )

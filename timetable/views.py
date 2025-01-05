@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.shortcuts import render
 from .serializers import CourseExamInfoSerializer
 from .models import CoursesExamInfo
 from .helpers import parse_school_exam_timetable, nursing_exam_timetable_parser

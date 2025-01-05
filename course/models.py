@@ -15,44 +15,20 @@ class Course(models.Model):
         blank=False,
         unique=True,
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now_add=True)
-
-
-class Lesson(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-    semester = models.UUIDField(
-        null=False,
+    name = models.CharField(
+        max_length=256,
         blank=False,
-    )
-    section = models.CharField(
-        max_length=20,
-    )
-    campus = models.CharField(
-        max_length=30,
-    )
-    weekday = models.CharField(
-        max_length=15,
-    )
-
-    room = models.CharField(
-        max_length=15,
-    )
-    period = models.CharField(
-        max_length=60,
-    )
-
-    lecturer = models.CharField(
-        max_length=60,
-    )
-    course = models.ForeignKey(
-        Course,
-        related_name="lessons_courses",
-        on_delete=models.DO_NOTHING,
+        null=False,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        """
+        Neatly set the case of the data
+        """
+        self.unit = str(self.unit).upper()
+        if self.name == "" or self.name is None:
+            self.name = str(self.unit).title()
+
+        super().save()

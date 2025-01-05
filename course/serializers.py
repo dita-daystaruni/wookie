@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from rest_framework import serializers
 
-from course.models import Course, Lesson
+from course.models import Course
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -21,11 +21,3 @@ class CourseSerializer(serializers.ModelSerializer):
             course = Course.objects.filter(unit=validated_data.unit)
 
         return course
-
-
-class LessonSerializer(serializers.ModelSerializer):
-    """The lesson serializer"""
-
-    class Meta:
-        model = Lesson
-        fields = "__all__"
