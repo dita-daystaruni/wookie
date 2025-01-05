@@ -23,6 +23,12 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self) -> str:
+        """
+        String representation for the model
+        """
+        return f"{self.unit}"
+
     def save(self, *args, **kwargs):
         """
         Neatly set the case of the data
