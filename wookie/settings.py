@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     "corsheaders",
     # Custom applications
     "course.apps.CourseConfig",
-    "notifications.apps.NotificationsConfig",
     "timetable.apps.TimetableConfig",
     "exams.apps.ExamsConfig",
 ]
