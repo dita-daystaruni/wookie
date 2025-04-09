@@ -1,6 +1,7 @@
 """Definition to the timetable serializer."""
 
 from .models import CoursesExamInfo
+from datetime import datetime
 from rest_framework import serializers
 
 
@@ -11,6 +12,8 @@ class MessageSerializer(serializers.Serializer):
 
 class CourseExamInfoSerializer(serializers.ModelSerializer):
     """The Timetable Serializer Class."""
+
+    datetime_str = serializers.SerializerMethodField()
 
     class Meta:
         """Defines the timetable serializer."""
@@ -25,4 +28,14 @@ class CourseExamInfoSerializer(serializers.ModelSerializer):
             "coordinator",
             "hrs",
             "invigilator",
+            "datetime_str",
         ]
+    def get_datetime_str(self, instance):
+        """
+        returns Iso format
+        """
+        time = instance.day.split(' ')[1]
+        time += " " + instance.time.split("-")[0]
+        # '%m/%d/%Y %I:%M %p'
+        time = datetime.strptime(time, "%d/%m/%y %H:%M%p")
+        return time.isoformat()
