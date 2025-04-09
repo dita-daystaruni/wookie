@@ -1,11 +1,11 @@
-from .serializers import CourseExamInfoSerializer
-from .models import CoursesExamInfo
-from .helpers import parse_school_exam_timetable, nursing_exam_timetable_parser
-from notifications.serializers import MessageSerializer
+from django.db import transaction
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from .helpers import parse_school_exam_timetable, nursing_exam_timetable_parser
 from .models import CoursesExamInfo
+from .serializers import CourseExamInfoSerializer, MessageSerializer
+
 
 class ParseTimeTablesAPI(APIView):
     """
@@ -17,15 +17,26 @@ class ParseTimeTablesAPI(APIView):
         """
         file = request.data.get("file")
         file_to_parse = request.data.get("file_name")
-
         if file_to_parse == "school_exams":
             courses = parse_school_exam_timetable(file)
-            for course in courses:
-                serializer = CourseExamInfoSerializer(data=course)
-                if serializer.is_valid():
-                    serializer.save()
-                else:
-                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # TODO consider using serializer many=True
+            with transaction.atomic():
+                for course in courses:
+                    serializer = CourseExamInfoSerializer(data=course)
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        # duplicate course, we handle by deleting duplicate courses
+                        if serializer.errors.get('course_code')[0] == \
+                            "courses exam info with this course code already exists.":
+                            # TODO log this in future
+                            print(course)
+                            dup_course = CoursesExamInfo.objects.get(
+                                course_code=course["course_code"],
+                            )
+                            dup_course.delete()
+                            continue
+                        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif file_to_parse == "nursing_exams":
             courses = nursing_exam_timetable_parser(file)
             for course in courses:
@@ -34,6 +45,10 @@ class ParseTimeTablesAPI(APIView):
                     serializer.save()
                 else:
                     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            message = {"message": "file to parse options are school_exams or nursing_exams"}
+            serializer = MessageSerializer(message)
+            return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
         
          # parsing and writing to database was successful
         message = {"message": "Successfully Parsed and Saved To Database"}
